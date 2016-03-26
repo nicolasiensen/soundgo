@@ -7,6 +7,8 @@
   },
   "dependencies": {
     "react-native": "^0.20.0",
-    "react-native-material-kit": "^0.3.0"
+    "react-native-button": "^1.4.2",
+    "react-native-fs": "^1.2.0",
+    "superagent": "^1.8.3"
   }
 }
