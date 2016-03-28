@@ -1,6 +1,7 @@
 import React from 'react-native'
 import Button from 'react-native-button'
 import superagent from 'superagent'
+import RNFS from 'react-native-fs'
 
 const {
   View,
@@ -13,21 +14,27 @@ const {
 const Index = React.createClass ({
   getInitialState () {
     return ({
-      tracks: new ListView.DataSource({
+      loaded: false,
+      tracksDataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       })
     })
   },
 
+  componentWillMount () {
+    this.loadTracks()
+  },
+
   loadTracks () {
     superagent
-      .get('https://api.soundcloud.com/tracks')
+      .get('https://api.soundcloud.com/me/activities/tracks/affiliated')
       .query({client_id: '613b49e595474fe66d19172652fe8423'})
+      .query({oauth_token: this.props.accessToken})
       .end((err, res) => {
-        console.log(res)
         this.setState({
-          tracks: this.state.tracks.cloneWithRows(
-            res.body.filter((track) => track.downloadable)
+          loaded: true,
+          tracksDataSource: this.state.tracksDataSource.cloneWithRows(
+            res.body.collection.map((item) => item.origin)
           )
         })
       })
@@ -35,7 +42,7 @@ const Index = React.createClass ({
 
   downloadTrack (track) {
     RNFS.downloadFile(
-      `${track.download_url}?client_id=613b49e595474fe66d19172652fe8423`,
+      `${track.uri}/download?client_id=613b49e595474fe66d19172652fe8423`,
       `/mnt/sdcard/${track.id}.${track.original_format}.tmp`,
       (start) => {
         RNFS.downloadFile(
@@ -61,15 +68,22 @@ const Index = React.createClass ({
     )
   },
 
+  renderTrackList () {
+    return (
+      <ListView
+        dataSource={this.state.tracksDataSource}
+        renderRow={this.renderTrack}
+        style={styles.listView}
+      />
+    )
+  },
+
   render () {
     return (
       <View style={styles.container}>
-        <Button onPress={this.loadTracks}>Load tracks</Button>
-        <ListView
-          dataSource={this.state.tracks}
-          renderRow={this.renderTrack}
-          style={styles.listView}
-        />
+        {
+          this.state.loaded ? this.renderTrackList() : <Text>Loading...</Text>
+        }
       </View>
     )
   }
