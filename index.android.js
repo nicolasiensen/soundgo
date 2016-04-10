@@ -5,7 +5,7 @@ import Button from 'react-native-button'
 import superagent from 'superagent'
 import RNFS from 'react-native-fs'
 
-import Index from './js/components/Index'
+import TrackList from './js/components/TrackList'
 import Connect from './js/components/Connect'
 
 const { AppRegistry, Linking } = React
@@ -26,7 +26,7 @@ const soundgo = React.createClass ({
 
   render() {
     const { accessToken } = this.state
-    return accessToken ? <Index accessToken={accessToken} /> : <Connect />
+    return accessToken ? <TrackList accessToken={accessToken} /> : <Connect />
   }
 })
 

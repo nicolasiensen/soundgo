@@ -5,7 +5,7 @@ import * as api from './../api'
 
 const { View, Text, ListView } = React
 
-const Index = React.createClass ({
+const TrackList = React.createClass ({
   getInitialState () {
     return ({
       loaded: false,
@@ -110,4 +110,4 @@ const Index = React.createClass ({
   }
 })
 
-export default Index
+export default TrackList
