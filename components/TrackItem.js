@@ -5,12 +5,12 @@ const TrackItem = React.createClass ({
   renderTrackStatus () {
     const { file } = this.props
 
-    if (file.isDownloaded) {
+    if (file === undefined) {
+      return 'Tap to download'
+    } else if (file.isDownloaded) {
       return 'Tap to play'
     } else if (file.isDownloading) {
       return `Downloading ${file.downloadProgress}%`
-    } else {
-      return 'Tap to download'
     }
   },
 
