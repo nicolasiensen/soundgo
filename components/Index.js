@@ -8,7 +8,8 @@ const {
   Text,
   StyleSheet,
   ListView,
-  TouchableHighlight
+  TouchableHighlight,
+  Image
 } = React
 
 const Index = React.createClass ({
@@ -59,10 +60,13 @@ const Index = React.createClass ({
 
   renderTrack (track) {
     return (
-      <TouchableHighlight
-       onPress={() => {this.downloadTrack(track)}}>
-        <View style={styles.track}>
-          <Text>{track.title}</Text>
+      <TouchableHighlight onPress={() => {this.downloadTrack(track)}}>
+        <View style={{padding: 10, flexDirection: 'row', alignItems: 'center'}}>
+          <Image source={{uri: track.artwork_url}} style={{width: 75, height: 75, marginRight: 10}} />
+          <View style={{flex: 1}}>
+            <Text style={{fontWeight: 'bold'}}>{track.title}</Text>
+            <Text>by {track.user.username}</Text>
+          </View>
         </View>
       </TouchableHighlight>
     )
@@ -71,29 +75,27 @@ const Index = React.createClass ({
   renderTrackList () {
     return (
       <ListView
+        style={{flex: 1}}
         dataSource={this.state.tracksDataSource}
         renderRow={this.renderTrack}
-        style={styles.listView}
       />
+    )
+  },
+
+  renderLoading () {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Loading...</Text>
+      </View>
     )
   },
 
   render () {
     return (
-      <View style={styles.container}>
-        {
-          this.state.loaded ? this.renderTrackList() : <Text>Loading...</Text>
-        }
+      <View style={{flex: 1}}>
+        {this.state.loaded ? this.renderTrackList() : this.renderLoading()}
       </View>
     )
-  }
-})
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
   }
 })
 
