@@ -1,21 +1,15 @@
 import React from 'react-native'
-import Button from 'react-native-button'
 import superagent from 'superagent'
 import RNFS from 'react-native-fs'
+import TrackItem from './TrackItem'
 
-const {
-  View,
-  Text,
-  StyleSheet,
-  ListView,
-  TouchableHighlight,
-  Image
-} = React
+const { View, Text, ListView } = React
 
 const Index = React.createClass ({
   getInitialState () {
     return ({
       loaded: false,
+      files: [],
       tracksDataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2,
       })
@@ -24,6 +18,7 @@ const Index = React.createClass ({
 
   componentWillMount () {
     this.loadTracks()
+    this.loadLocalFiles()
   },
 
   loadTracks () {
@@ -41,6 +36,17 @@ const Index = React.createClass ({
       })
   },
 
+  loadLocalFiles () {
+    RNFS.readDir('/mnt/sdcard').then((files) => {
+      this.setState({
+        files: files.map((file) => ({
+          name: file.name,
+          isDownloaded: true
+        }))
+      })
+    })
+  },
+
   downloadTrack (track) {
     RNFS.downloadFile(
       `${track.uri}/download?client_id=613b49e595474fe66d19172652fe8423`,
@@ -49,10 +55,25 @@ const Index = React.createClass ({
         RNFS.downloadFile(
           start.headers.Location,
           `/mnt/sdcard/${track.id}.${track.original_format}`,
-          (start) => {console.log(start)},
-          (progress) => {console.log(progress)}
+          (start) => {
+            this.setState({
+              files: this.state.files.concat([{name: `${track.id}.${track.original_format}`, isDownloading: true}])
+            })
+          },
+          (progress) => {
+            const progressSummary = parseInt(progress.bytesWritten / progress.contentLength * 100)
+            this.setState({
+              files: this.state.files.map((file) => {
+                if (file.name === `${track.id}.${track.original_format}`) {
+                  return Object.assign({}, file, { downloadProgress: progressSummary })
+                } else {
+                  return file
+                }
+              })
+            })
+          }
         ).then((success) => {
-          console.log('Download finished!')
+          this.loadLocalFiles()
         })
       }
     )
@@ -60,15 +81,11 @@ const Index = React.createClass ({
 
   renderTrack (track) {
     return (
-      <TouchableHighlight onPress={() => {this.downloadTrack(track)}}>
-        <View style={{padding: 10, flexDirection: 'row', alignItems: 'center'}}>
-          <Image source={{uri: track.artwork_url}} style={{width: 75, height: 75, marginRight: 10}} />
-          <View style={{flex: 1}}>
-            <Text style={{fontWeight: 'bold'}}>{track.title}</Text>
-            <Text>by {track.user.username}</Text>
-          </View>
-        </View>
-      </TouchableHighlight>
+      <TrackItem
+        track={track}
+        file={this.state.files.find((file) => file.name === `${track.id}.${track.original_format}`)}
+        onPress={this.downloadTrack}
+      />
     )
   },
 
