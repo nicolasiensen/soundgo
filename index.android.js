@@ -5,8 +5,8 @@ import Button from 'react-native-button'
 import superagent from 'superagent'
 import RNFS from 'react-native-fs'
 
-import Index from './components/Index'
-import Connect from './components/Connect'
+import Index from './js/components/Index'
+import Connect from './js/components/Connect'
 
 const { AppRegistry, Linking } = React
 
