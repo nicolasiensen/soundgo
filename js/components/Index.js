@@ -1,7 +1,7 @@
 import React from 'react-native'
-import superagent from 'superagent'
 import RNFS from 'react-native-fs'
 import TrackItem from './TrackItem'
+import * as api from './../api'
 
 const { View, Text, ListView } = React
 
@@ -17,15 +17,7 @@ const Index = React.createClass ({
   },
 
   componentWillMount () {
-    this.loadTracks()
-    this.loadLocalFiles()
-  },
-
-  loadTracks () {
-    superagent
-      .get('https://api.soundcloud.com/me/activities/tracks/affiliated')
-      .query({client_id: '613b49e595474fe66d19172652fe8423'})
-      .query({oauth_token: this.props.accessToken})
+    api.loadTracks(this.props.accessToken)
       .end((err, res) => {
         this.setState({
           loaded: true,
@@ -34,6 +26,8 @@ const Index = React.createClass ({
           )
         })
       })
+
+    this.loadLocalFiles()
   },
 
   loadLocalFiles () {
